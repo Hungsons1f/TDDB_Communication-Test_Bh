@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_GovernorSerialBatchRead_1" Id="{422591a1-18cb-4cdd-a764-c522ec18344b}">
+    <Declaration><![CDATA[TYPE ST_GovernorSerialBatchRead_1 :
+STRUCT
+	iPrefix			:		BYTE	:= 16#05;
+	iStationNo		:		STRING[2];
+	iPCNo			:		STRING[2];
+	iCmdBatchRead	:		STRING[2];	//:= 'BR';
+	iMsgWaitTime	:		STRING[1]; 	//:= '0';
+	iDeviceAdr		:		STRING[5];
+	iNumberDevice	:		STRING[2]; 
+	iCheckSum		:		STRING[2];
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

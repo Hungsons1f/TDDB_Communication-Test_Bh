@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_ExcitationPulseModulation" Id="{b8ab3866-b4ca-4583-8e82-dd7ab239c044}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_ExcitationPulseModulation
+VAR
+	bIncrease	:	BOOL;
+	bDecrease	: 	BOOL;
+	
+	bIncPulse	:	BOOL;
+	bDecPulse	:	BOOL;
+	
+	iPulseWidth	:	INT;
+	iNumOfPulse	:	INT;
+	iDelayTime	:	INT;
+	
+	tonPulseCreation :	TON;
+	bOutPulse	:	BOOL;
+	iStep		:	INT;
+	iLoop		:	INT;
+	bPulse		:	BOOL;
+	bDelayStep	:	BOOL := TRUE;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE iStep OF 
+	0: // Wait for command
+		IF bIncrease OR bDecrease THEN
+			iStep := 5;
+		END_IF
+		
+	5: // Init
+		tonPulseCreation.PT := INT_TO_TIME(iPulseWidth);
+		iLoop := 0;
+		iStep := 10;
+		
+	10:	// Create pulse
+		bPulse := TRUE;
+		IF tonPulseCreation.Q THEN
+			tonPulseCreation(IN := FALSE);
+			iStep := 15;
+		END_IF
+		
+	15: // Pulse off
+		bPulse := FALSE;
+		IF tonPulseCreation.Q THEN
+			tonPulseCreation(IN := FALSE);
+			iStep := 17;
+		END_IF
+		
+	17: // Check loop
+		IF iLoop < iNumOfPulse - 1 THEN
+			iStep := 10;
+			iLoop := iLoop + 1;
+		ELSE
+			iStep := 20;
+			iLoop := 0;
+			tonPulseCreation.PT := INT_TO_TIME(iDelayTime - iPulseWidth);
+		END_IF
+		
+	20: // Delay pusle 
+		bPulse := FALSE;
+		IF tonPulseCreation.Q THEN
+			tonPulseCreation(IN := FALSE);
+			iStep := 30;
+		END_IF
+		
+	30: // Complete
+		IF NOT bIncrease AND NOT bDecrease THEN 
+			iStep := 0;
+		END_IF
+	
+END_CASE
+
+
+tonPulseCreation(IN := iStep >= 10 AND iStep <= 20);
+
+bIncPulse := bIncrease AND bPulse;
+bDecPulse := bDecrease AND bPulse;
+
+bIncrease := FALSE;
+bDecrease := FALSE;
+]]></ST>
+    </Implementation>
+    <Property Name="DecPulse" Id="{2aa10090-6c2e-4d8c-8d99-0f32b114f2ca}">
+      <Declaration><![CDATA[PROPERTY DecPulse : BOOL]]></Declaration>
+      <Get Name="Get" Id="{2f8d1df4-47c7-43c2-9ee9-beacd141468a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[DecPulse := bDecPulse;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Decrease" Id="{ca61c3aa-9f50-49a3-b7ef-3e4707172db9}">
+      <Declaration><![CDATA[METHOD Decrease : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDecrease := TRUE;
+
+Decrease := bDecrease AND iStep = 30;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="IncPulse" Id="{a81b2a3f-0397-4167-9774-d55a58dee1b4}">
+      <Declaration><![CDATA[PROPERTY IncPulse : BOOL]]></Declaration>
+      <Get Name="Get" Id="{b94d3f15-ac19-4edd-a405-51ba0a0b4e95}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IncPulse := bIncPulse;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Increase" Id="{b4370d50-8e0e-4df2-a00b-3f3de7551bea}">
+      <Declaration><![CDATA[METHOD Increase : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bIncrease := TRUE;
+
+Increase := bIncrease AND iStep = 30;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_ExcitationPulseModulation">
+      <LineId Id="9" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="29" Count="2" />
+      <LineId Id="58" Count="2" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="37" Count="1" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="143" Count="1" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="148" Count="4" />
+      <LineId Id="155" Count="1" />
+      <LineId Id="162" Count="3" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="167" Count="1" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="157" Count="1" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="160" Count="1" />
+      <LineId Id="66" Count="2" />
+      <LineId Id="90" Count="1" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="121" Count="2" />
+      <LineId Id="99" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ExcitationPulseModulation.DecPulse.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ExcitationPulseModulation.Decrease">
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="6" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ExcitationPulseModulation.IncPulse.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ExcitationPulseModulation.Increase">
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="6" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

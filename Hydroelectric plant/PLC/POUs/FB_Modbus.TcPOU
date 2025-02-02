@@ -10,13 +10,17 @@ VAR
 	fbModbusMaster1 :		FB_ModbusMaster;
 	fbModbusMaster2 :		FB_ModbusMaster;
 	fbModbusSlave	:		FB_PM2200;
-	fbModbusSlave1	: 		FB_TDS3000;
-	fbModbusSlave2	: 		FB_TDS3000;
-	fbModbusSlave3	: 		FB_TDS3000;
+	fbModbusSlave1	: 		FB_TDS323PC57;
+	fbModbusSlave2	: 		FB_TDS323PC57;
+	fbModbusSlave3	: 		FB_TDS4339;
 	istep			:		UINT;
 	bStart			:		BOOL;
 	
 	arrData			:		ARRAY [0..255] OF BYTE := [1,3,12,16#00,16#01,16#01,16#02,16#03,16#01,16#01,16#01,16#01,16#01,16#01,16#01,3,5] ;
+	fbex			:		FB_ExcitationPulseModulation;
+	tonMeo			:		TON;
+	btest			:		BOOL;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -47,14 +51,14 @@ END_VAR
 		fbModbusMaster2.FirstCycle();
 		fbModbusMaster2.Init();
 		fbModbusMaster2.RegisterSlave(fbModbusSlave1);
-		fbModbusMaster2.RegisterSlave(fbModbusSlave2);
-		fbModbusMaster2.RegisterSlave(fbModbusSlave3);
+//		fbModbusMaster2.RegisterSlave(fbModbusSlave2);
+//		fbModbusMaster2.RegisterSlave(fbModbusSlave3);
 		fbModbusMaster2.Timeout := 1000;
 		
 		istep := 20;
 		
 	20: //Running
-		IF fbModbusMaster1.Run()AND fbModbusMaster2.Run() THEN
+		IF (*fbModbusMaster1.Run()*) fbModbusMaster2.Run() THEN
 			istep := 30;
 		END_IF
 		
@@ -62,10 +66,21 @@ END_VAR
 		
 END_CASE
 
-fbModbusMaster1();
+//fbModbusMaster1();
 fbModbusMaster2();
 
-fbModbusSlave.Convert(0, ADR(arrData));]]></ST>
+fbModbusSlave.Convert(0, ADR(arrData));
+fbModbusSlave1.Convert(0, ADR(arrData));
+fbModbusSlave3.Convert(0, ADR(arrData));
+
+fbex();
+tonMeo(IN := NOT tonMeo.Q, PT:= T#2S);
+IF btest THEN
+	fbex.Increase();
+END_IF
+
+
+]]></ST>
     </Implementation>
     <LineIds Name="FB_Modbus">
       <LineId Id="17" Count="9" />
@@ -83,6 +98,12 @@ fbModbusSlave.Convert(0, ADR(arrData));]]></ST>
       <LineId Id="72" Count="0" />
       <LineId Id="47" Count="0" />
       <LineId Id="9" Count="0" />
+      <LineId Id="97" Count="1" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="120" Count="3" />
+      <LineId Id="145" Count="1" />
+      <LineId Id="144" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_GovernorTest" Id="{caeeb0d8-549a-4820-8104-7f654818a633}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_GovernorTest
+
+VAR
+	istep			:		UINT;
+	bStart			:		BOOL;
+
+	fbGovernor	:	FB_GovernorSerialCom;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE istep OF
+	0: //Trigger
+		IF bStart THEN
+			bStart := FALSE;
+			istep := 10;
+		END_IF
+		
+	10: //Init		
+		fbGovernor.Init();
+		fbGovernor.Timeout := 1000;
+		fbGovernor.ScanTime := 1;
+		istep := 20;
+		
+	20: //Running
+		IF fbGovernor.Run() THEN
+			istep := 30;
+		END_IF
+		
+	30: //Stopped
+		
+END_CASE
+
+fbGovernor();]]></ST>
+    </Implementation>
+    <LineIds Name="FB_GovernorTest">
+      <LineId Id="14" Count="7" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="45" Count="8" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

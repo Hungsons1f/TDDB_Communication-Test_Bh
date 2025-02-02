@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_GovernorSerialAck_1" Id="{d2a16dca-4bad-4e85-988a-56d5e9bcc1b1}">
+    <Declaration><![CDATA[TYPE ST_GovernorSerialAck_1 :
+STRUCT
+	iPrefix			:	BYTE := 16#06;
+	iStationNo		:	STRING[2];
+	iPCNo			:	STRING[2];
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -74,6 +74,7 @@ VAR
 	fbCal8	: FB_CalculateAI;
 	
 	fbModbus : FB_Modbus;
+	fbGovernorTest: FB_GovernorTest;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -173,6 +174,8 @@ END_VAR
 
 fbModbus();
 
+fbGovernorTest();
+
 ]]></ST>
     </Implementation>
     <LineIds Name="MAIN">
@@ -212,6 +215,8 @@ fbModbus();
       <LineId Id="156" Count="22" />
       <LineId Id="337" Count="0" />
       <LineId Id="336" Count="0" />
+      <LineId Id="490" Count="0" />
+      <LineId Id="489" Count="0" />
       <LineId Id="413" Count="0" />
       <LineId Id="412" Count="0" />
     </LineIds>

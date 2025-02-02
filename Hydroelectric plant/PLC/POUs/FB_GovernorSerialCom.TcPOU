@@ -1,0 +1,610 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_GovernorSerialCom" Id="{52a5f590-92ea-4c20-8cb3-84d054e3fd22}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_GovernorSerialCom
+VAR
+	sName			:		STRING;
+	bInitialized	:		BOOL;
+	iScantime		:		UINT;
+	iTimeout		:		UINT;
+	
+	bBusy			: 		BOOL;
+	bError			:		BOOL;
+	
+	iStepInit		:		INT;
+	iStepGeneral	: 		INT;
+	iStepRunning	:		INT;
+	bFirstCycle		:		BOOL := TRUE;
+	
+	bRun			:		BOOL;
+	bStop			: 		BOOL;
+	
+	fbSendData		: 		SendData;
+	fbReadData		:		ReceiveData;
+	fbPcComCtrl		:		SerialLineControl;
+	pData			:		POINTER TO BYTE;
+	iLength			:		UDINT;
+	txBuffer		:		ComBuffer;
+	rxBuffer		:		ComBuffer;
+	stIn_PcCom AT %I*	: PcComInData;	
+	stOut_PcCom AT %Q*	: PcComOutData;	
+		
+	sStationNo		:		ARRAY [0..1] OF BYTE := [16#30, 16#31];
+	sPCNo			:		ARRAY [0..1] OF BYTE := [16#FF, 16#FF];
+	sDeviceAdr		:		ARRAY [0..4] OF BYTE := [16#44, 16#30, 16#31, 16#36, 16#30];
+	sNumberDevice	:		ARRAY [0..1] OF BYTE := [16#30, 16#37]; 
+	
+	stBatchReadFrame	:	U_GovernorSerialBatchRead;
+	stAckFrame			:	U_GovernorSerialAck;
+	stBatchResponseFrame:	U_GovernorSerialBatchResponse;
+	
+	bDelayState		:		BOOL;
+	tonScanTime		:		TON;
+	iLoop			:		INT;
+	trSend			:		R_TRIG;
+	
+	a : WORD;
+END_VAR
+VAR CONSTANT
+	iReadPrefix 	:	BYTE := 16#02;
+	sCommandBatchRead	:	ARRAY [0..1] OF BYTE := [16#42, 16#52];
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[ IF bFirstCycle THEN
+	bFirstCycle := FALSE;
+	
+	stBatchReadFrame.stFrame.iPrefix 	:= 16#05;
+	stBatchReadFrame.stFrame.iStationNo := sStationNo;
+	stBatchReadFrame.stFrame.iPCNo		:= sPCNo;
+	stBatchReadFrame.stFrame.iCmdBatchRead := sCommandBatchRead;
+	stBatchReadFrame.stFrame.iMsgWaitTime := 16#30;
+	stBatchReadFrame.stFrame.iDeviceAdr	:= sDeviceAdr;
+	stBatchReadFrame.stFrame.iNumberDevice := sNumberDevice;
+	stBatchReadFrame.stFrame.iCheckSum[0] := WORD_TO_BYTE(SHR(F_CheckSum16(ADR(stBatchReadFrame) + 1, 14, 0), 4) AND 16#000F);
+	stBatchReadFrame.stFrame.iCheckSum[1] := WORD_TO_BYTE(F_CheckSum16(ADR(stBatchReadFrame) + 1, 14, 0) AND 16#000F);
+	
+	stAckFrame.stFrame.iPrefix 		:= 16#06;
+	stAckFrame.stFrame.iStationNo 	:= sStationNo;
+	stAckFrame.stFrame.iPCNo 		:= sPCNo;
+END_IF
+		
+StateMachine();
+
+bInitialized := iStepGeneral >= 20;
+bBusy := fbSendData.Busy AND fbReadData.busy AND iStepGeneral = 30;
+
+bError S= (fbSendData.Error <> ComError_t.COMERROR_NOERROR OR fbReadData.Error <> ComError_t.COMERROR_NOERROR OR fbPcComCtrl.Error) AND (iStepGeneral = 30) AND (iStepRunning = 60);
+bError R= (NOT (fbSendData.Error <> ComError_t.COMERROR_NOERROR) AND NOT (fbReadData.Error <> ComError_t.COMERROR_NOERROR) AND NOT fbPcComCtrl.Error) AND (iStepGeneral = 30) AND (iStepRunning = 60);
+
+IF trSend.Q THEN
+	fbSendData(pSendData := ADR(stBatchReadFrame), Length := SIZEOF(stBatchReadFrame), TXbuffer := txBuffer);
+END_IF
+
+fbReadData(
+	pPrefix:= ADR(iReadPrefix),
+	LenPrefix := 1,
+	pReceiveData := ADR(stBatchResponseFrame),
+	SizeReceiveData := SIZEOF(stBatchResponseFrame),
+	Timeout:= T#1S,
+	RXbuffer:= RxBuffer );
+	
+fbPcComCtrl(
+	Mode:= SERIALLINEMODE_PC_COM_PORT, 
+	pComIn:= ADR(stIn_PcCom), 
+	pComOut:= ADR(stOut_PcCom), 
+	SizeComIn:= SIZEOF(stIn_PcCom), 
+	TxBuffer:= txBuffer, 
+	RxBuffer:= rxBuffer );
+	
+tonScanTime(IN := iStepRunning >= 10 AND iStepRunning <= 100 AND iStepGeneral = 30, PT := INT_TO_TIME(iScantime));
+trSend(CLK := iStepRunning >= 20 AND iStepRunning <= 30);
+
+bRun := FALSE;
+bStop := FALSE;
+
+//	// error	
+//		fbAxisError.Description := FUN_MergeStrings5(sMotorName, ' axis error number: ', UDINT_TO_STRING(iErrorID), '', '');
+//		fbAxisError.Set(bError);
+]]></ST>
+    </Implementation>
+    <Folder Name="Methods" Id="{84fc7178-4e1b-4d9a-bc3b-4a5afe5bf133}" />
+    <Folder Name="Properties" Id="{b0cde6b9-b1bc-4db2-b0f5-1f26e810666c}">
+      <Folder Name="Data" Id="{9d42a754-4192-44df-a725-bb30cb51e009}" />
+    </Folder>
+    <Folder Name="StateMachine" Id="{9b1a1034-2123-4a43-8ff9-221c46ed01fb}" />
+    <Method Name="Abort" Id="{ac029164-0da0-4543-9d43-0f26c5ad1003}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD Abort : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="AnyError" Id="{4e6f9141-7e35-4a9f-8921-ee4f84dd0827}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY AnyError : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{9ad3e1dd-a044-4326-81d8-9ff5b0038567}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[AnyError 	:= bError;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Busy" Id="{f071631c-b89d-4a14-9b33-2744b501ade2}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Busy : BOOL]]></Declaration>
+      <Get Name="Get" Id="{59ac161d-3510-4e9e-a694-cf1af4e330c3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Busy := bBusy;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="DataBladeOpening" Id="{67d0e371-25b0-4037-885b-7c165fddd147}" FolderPath="Properties\Data\">
+      <Declaration><![CDATA[PROPERTY DataBladeOpening : REAL]]></Declaration>
+      <Get Name="Get" Id="{02fd01de-dd4c-415a-aa64-62f219258194}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[DataBladeOpening := WORD_TO_REAL(stBatchResponseFrame.stFrame.iDataBladeOpening)/4096*100;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="DataFrequency" Id="{5032ac4e-edc3-4a60-9c97-907ddd57d20e}" FolderPath="Properties\Data\">
+      <Declaration><![CDATA[PROPERTY DataFrequency : REAL]]></Declaration>
+      <Get Name="Get" Id="{150f917b-c83b-4146-a976-b6c74dc69d4c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[DataFrequency := WORD_TO_REAL(stBatchResponseFrame.stFrame.iDataFrequency)/32767*100;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="DataGateOpening" Id="{b72f232f-7bbf-4da0-a6ec-7f113ecdef66}" FolderPath="Properties\Data\">
+      <Declaration><![CDATA[PROPERTY DataGateOpening : REAL]]></Declaration>
+      <Get Name="Get" Id="{077137ec-abc1-462c-a724-4e45db4096b3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[DataGateOpening := WORD_TO_REAL(stBatchResponseFrame.stFrame.iDataGateOpening)/4096*100;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="DataGateOpenSet" Id="{004b4d17-3045-41ac-bb85-e5dd1883263b}" FolderPath="Properties\Data\">
+      <Declaration><![CDATA[PROPERTY DataGateOpenSet : REAL]]></Declaration>
+      <Get Name="Get" Id="{713ff82e-751a-4110-b51d-54f5c87110b7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[DataGateOpenSet := WORD_TO_REAL(stBatchResponseFrame.stFrame.iDataGateOpenSet)/32767*100;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="DataState" Id="{911ff35f-f606-42c7-be5f-4da6a512535d}" FolderPath="Properties\Data\">
+      <Declaration><![CDATA[PROPERTY DataState : WORD]]></Declaration>
+      <Get Name="Get" Id="{2f847ecb-d988-4738-8844-226dd2816980}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[DataState := stBatchResponseFrame.stFrame.iDataState;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="FirstCycle" Id="{fb0033be-add6-483f-b39a-5e7a9cf9e853}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD FirstCycle : BOOL
+VAR_INPUT
+//	ipAlarmController	: I_AlarmController;
+//	ipHMIController	: I_HMIController;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{26ebf153-e11e-47d6-aba9-17bcec119ceb}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD Init : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF iStepGeneral = 0 THEN
+	iStepGeneral := 10;
+END_IF
+
+//Method output
+	Init := (iStepGeneral >= 20);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Initialized" Id="{ecf18dd1-c2d9-4232-b1d8-a740c89b4693}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Initialized : BOOL
+]]></Declaration>
+      <Get Name="Get" Id="{2fe62b97-a097-4539-b4e4-d92bc4daada9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Initialized := bInitialized;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Name" Id="{5e745e47-3a98-4a44-91d9-3b550cceacfb}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Name : STRING
+]]></Declaration>
+      <Get Name="Get" Id="{0c4799de-2d4e-4105-b9e3-115d293d9a57}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Name := sName;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{ee588da0-b295-4569-8946-3626e9442c9c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[sName := Name;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="Reset" Id="{9c86d807-994f-4463-8118-361821ba586e}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD Reset : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bError := FALSE;
+bError := FALSE;
+iStepInit		:= 0;
+iStepGeneral	:= 0;
+iStepRunning	:= 0;
+
+
+Reset := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Run" Id="{c79f7041-73ae-430c-9dcf-78d249b0e3bf}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD Run : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF (iStepGeneral = 20) THEN
+	iStepGeneral := 30;
+END_IF
+
+bRun := TRUE;
+Run := (iStepGeneral >= 30) AND (iStepGeneral < 200);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="ScanTime" Id="{bd649d1c-bc52-4a29-ab0a-2b0c80efb6c4}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY ScanTime : UINT]]></Declaration>
+      <Get Name="Get" Id="{01f11b07-25ce-4fc5-abc3-96a15629b4a8}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ScanTime := iScantime;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{1cd8a04e-d694-403e-8e66-c84414ea117c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[iScantime := ScanTime;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="StateInit" Id="{2fc89dfb-53ac-489a-9393-a850a4ce0ad1}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD StateInit : BOOL (*Unit is performing initialization*)
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bError THEN
+	iStepGeneral := 20;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StateMachine" Id="{c054500d-4632-46b0-95ab-2b1b14e2f7f2}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD StateMachine : BOOL (*State machine of unit*)
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//State machine						   
+	CASE iStepGeneral OF
+		0:  //Uninitialized
+			StateUninitialized();
+	
+		10: //Initializing
+			StateInit();
+	
+		20: //Ready
+			StateReady();
+		
+		30: //Running
+			StateRunning();
+						
+		200: //stop
+			StateStopping();
+			
+		210: //stop done
+			StateStoppingDone();
+	END_CASE
+	
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StateReady" Id="{97354b86-a8aa-4b1d-98d3-b12c9b305662}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD StateReady : BOOL (* Unit is initialized*)
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StateRunning" Id="{8064ce6a-a2b6-4712-8f1b-ecf606b53326}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD StateRunning : BOOL (* Unit is uninitialized*)
+VAR 
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE iStepRunning OF
+	0: // Trigger
+		IF TRUE THEN
+			iStepRunning := 10;
+		END_IF
+
+	10: // Request Send
+		IF NOT fbSendData.Busy THEN
+			iStepRunning := 20;
+		END_IF
+		
+	20: // Confirm Send Request
+		IF fbSendData.Busy THEN
+			iStepRunning := 30;
+		END_IF
+		
+	30: // Wait Send done
+		IF NOT fbSendData.Busy THEN
+			iStepRunning := 40;
+		END_IF
+		
+	40: // Wait Receive event
+		IF fbReadData.busy THEN
+			iStepRunning := 50;
+		END_IF
+	
+	50: // Wait Receive done
+		IF NOT fbReadData.DataReceived THEN
+			iStepRunning := 60;
+		END_IF
+		
+	60: // Request Ack
+		IF NOT fbSendData.Busy THEN
+			iStepRunning := 70;
+		END_IF
+		
+	70: // Confirm Ack
+		IF fbSendData.Busy THEN
+			iStepRunning := 80;
+		END_IF
+		
+	80: // Wait Ack done
+		IF NOT fbSendData.Busy THEN
+			iStepRunning := 90;
+		END_IF
+		
+	90: // Convert Data
+		IF TRUE THEN
+			iStepRunning := 100;
+		END_IF
+	
+	100: // Return, done
+		IF tonScanTime.Q THEN
+			iStepRunning := 0;
+		END_IF
+	
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StateStopping" Id="{88cc0c69-2e36-4116-9317-cc3aa8ea1889}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD StateStopping : BOOL (* Unit is uninitialized*)
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[iStepGeneral	:= 210;
+iStepRunning	:= 0;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StateStoppingDone" Id="{99505961-561c-466d-ad55-50e67aede28a}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD StateStoppingDone : BOOL (* Unit is uninitialized*)
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bStop THEN
+	iStepGeneral := 20;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="StateUninitialized" Id="{b2bc5e98-e8d0-4aad-a3a9-b266a482fce2}" FolderPath="StateMachine\">
+      <Declaration><![CDATA[METHOD StateUninitialized : BOOL (* Unit is uninitialized*)
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{da0dfe7c-bfeb-446c-a827-2a61440e887c}" FolderPath="Methods\">
+      <Declaration><![CDATA[METHOD Stop : BOOL
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF iStepGeneral >= 30 AND iStepGeneral < 200 THEN
+	iStepGeneral := 200;
+END_IF
+bStop := TRUE;
+
+Stop := (iStepGeneral = 210);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Timeout" Id="{0307c532-c249-4641-8d41-8c13eefdb92b}" FolderPath="Properties\">
+      <Declaration><![CDATA[PROPERTY Timeout : UINT]]></Declaration>
+      <Get Name="Get" Id="{7ab159e1-75c3-4531-b797-12b78d30ff8f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Timeout := iTimeout;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{ebd85a5b-ae9b-4ebc-bd89-5cbd88ab23f0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[iTimeout := Timeout;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <LineIds Name="FB_GovernorSerialCom">
+      <LineId Id="43" Count="1" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="227" Count="1" />
+      <LineId Id="120" Count="1" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="276" Count="0" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="134" Count="1" />
+      <LineId Id="45" Count="2" />
+      <LineId Id="51" Count="4" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="143" Count="1" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="209" Count="4" />
+      <LineId Id="216" Count="1" />
+      <LineId Id="60" Count="1" />
+      <LineId Id="329" Count="0" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="205" Count="1" />
+      <LineId Id="62" Count="3" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.Abort">
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.AnyError.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.Busy.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.DataBladeOpening.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.DataFrequency.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.DataGateOpening.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.DataGateOpenSet.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.DataState.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.FirstCycle">
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.Init">
+      <LineId Id="5" Count="4" />
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.Initialized.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.Name.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.Name.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.Reset">
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="4" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.Run">
+      <LineId Id="5" Count="4" />
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.ScanTime.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.ScanTime.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.StateInit">
+      <LineId Id="5" Count="1" />
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.StateMachine">
+      <LineId Id="5" Count="20" />
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.StateReady">
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.StateRunning">
+      <LineId Id="11" Count="3" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="20" Count="25" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="49" Count="4" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="55" Count="2" />
+      <LineId Id="59" Count="3" />
+      <LineId Id="64" Count="1" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="66" Count="3" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="10" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.StateStopping">
+      <LineId Id="5" Count="2" />
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.StateStoppingDone">
+      <LineId Id="5" Count="1" />
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.StateUninitialized">
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.Stop">
+      <LineId Id="5" Count="4" />
+      <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.Timeout.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GovernorSerialCom.Timeout.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

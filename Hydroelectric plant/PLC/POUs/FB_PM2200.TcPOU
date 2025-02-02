@@ -305,29 +305,29 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[arrAddress[0][0] := 2999;			// Current A & B & C & N
-arrAddress[0][1] := 16;
+arrAddress[0][1] := 8;
 arrAddress[1][0] := 3007;			// Current G & Avg
-arrAddress[1][1] := 8;
+arrAddress[1][1] := 4;
 
 arrAddress[2][0] := 3019;			// Voltage AB, BC, CA, LL Avg
-arrAddress[2][1] := 16;		
+arrAddress[2][1] := 8;		
 arrAddress[3][0] := 3027;			// Voltage AN, BN, CN, LN Avg
-arrAddress[3][1] := 16;		
+arrAddress[3][1] := 8;		
 		
 arrAddress[4][0] := 3053;			// Active Power 
-arrAddress[4][1] := 16;				
+arrAddress[4][1] := 8;				
 arrAddress[5][0] := 3061;			// Reactive Power
-arrAddress[5][1] := 16;			
+arrAddress[5][1] := 8;			
 arrAddress[6][0] := 3069;			// Apparent Power
-arrAddress[6][1] := 16;				
+arrAddress[6][1] := 8;				
 
 arrAddress[7][0] := 3077;			// Power factor
-arrAddress[7][1] := 16;		
+arrAddress[7][1] := 8;		
 arrAddress[8][0] := 3085;			// Displacement Power factor
-arrAddress[8][1] := 16;		
+arrAddress[8][1] := 8;		
 		
 arrAddress[9][0] := 3109;			// Frequency
-arrAddress[9][1] := 4;				
+arrAddress[9][1] := 2;				
 
 iNumAddRegion := 10;
 

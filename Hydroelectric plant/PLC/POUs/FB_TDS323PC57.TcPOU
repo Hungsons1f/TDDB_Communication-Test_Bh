@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_TDS323PC57" Id="{e8fb70df-be29-4460-957f-9586549f42be}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TDS323PC57 EXTENDS FB_ModbusSlave
+VAR
+	arrConditionData	:	ARRAY [0..31] OF REAL;
+	arrUp_LoLimit		:	ARRAY [0..31] OF REAL;
+	arrUpUp_UpLimit		:	ARRAY [0..31] OF REAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="ConditionData" Id="{f85b153e-777c-46bf-afd8-d7a098fe9e2d}">
+      <Declaration><![CDATA[PROPERTY ConditionData : ARRAY [0..31] OF REAL]]></Declaration>
+      <Get Name="Get" Id="{a26145bd-6d63-412a-ae13-c34a1165bf75}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ConditionData := arrConditionData;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Convert" Id="{b48e17b2-54ba-4775-8ece-9ac9c943983a}">
+      <Declaration><![CDATA[METHOD Convert : BOOL
+VAR_INPUT
+	iRegionNo	:	INT;
+	pReadData	:	POINTER TO BYTE;
+END_VAR
+VAR
+	pTempData	: 	POINTER TO BYTE;
+	iTempData	: 	BYTE;
+	iLoop		: 	INT;
+	bHiByte		:	BOOL := TRUE;
+	iLoopStart	:	INT;
+	iLoopEnd	:	INT;
+	arrTempData	:	ARRAY [0..8] OF WORD;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR iLoop := 0 TO 7 DO
+	arrTempData[iLoop] := SHL(BYTE_TO_WORD(pReadData[iLoop*2+3]), 8);
+	arrTempData[iLoop] := arrTempData[iLoop] + BYTE_TO_WORD(pReadData[iLoop*2+3+1]);
+	IF bSwap THEN
+		arrTempData[iLoop] := ROL(arrTempData[iLoop], 8);
+	END_IF
+END_FOR
+
+CASE iRegionNo OF 
+	0: 
+		iLoopStart := 0;
+		iLoopEnd := 7;
+		
+	1: 
+		iLoopStart := 8;
+		iLoopEnd := 15;
+		
+	2: 
+		iLoopStart := 16;
+		iLoopEnd := 23;
+
+	3: 
+		iLoopStart := 24;
+		iLoopEnd := 31;
+	
+END_CASE
+
+FOR iLoop := 0 TO 7 DO 
+	arrConditionData[iLoopStart + iLoop] := WORD_TO_REAL(arrTempData[iLoop]);
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FirstCycle" Id="{70eeedf9-dc8a-4bd4-9ac7-1fc925a31989}">
+      <Declaration><![CDATA[METHOD FirstCycle : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[arrAddress[0][0] := 16#0000;
+arrAddress[0][1] := 8;
+arrAddress[1][0] := 16#0008;
+arrAddress[1][1] := 8;
+arrAddress[2][0] := 16#0010;
+arrAddress[2][1] := 8;
+arrAddress[3][0] := 16#0018;
+arrAddress[3][1] := 8;
+
+iNumAddRegion := 4;
+
+bSwap := FALSE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Up_LoLimit" Id="{d5b8ab1e-d642-46de-8c6b-98e1a26d2cb6}">
+      <Declaration><![CDATA[PROPERTY Up_LoLimit : ARRAY [0..63] OF WORD]]></Declaration>
+      <Get Name="Get" Id="{e20bdbc2-bf8e-4486-913d-26f0a21b8c5f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Up_LoLimit := arrUp_LoLimit;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="UpUp_UpLimit" Id="{c107981f-2291-4349-8d24-74209dc61e7b}">
+      <Declaration><![CDATA[PROPERTY UpUp_UpLimit : ARRAY [0..63] OF WORD]]></Declaration>
+      <Get Name="Get" Id="{6abb6c8a-f004-493f-b539-3cad41bef48c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[UpUp_UpLimit := arrUpUp_UpLimit;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <LineIds Name="FB_TDS323PC57">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS323PC57.ConditionData.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS323PC57.Convert">
+      <LineId Id="204" Count="6" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="213" Count="2" />
+      <LineId Id="218" Count="2" />
+      <LineId Id="216" Count="0" />
+      <LineId Id="222" Count="6" />
+      <LineId Id="221" Count="0" />
+      <LineId Id="212" Count="0" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="231" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_TDS323PC57.FirstCycle">
+      <LineId Id="17" Count="1" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="49" Count="3" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS323PC57.Up_LoLimit.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS323PC57.UpUp_UpLimit.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

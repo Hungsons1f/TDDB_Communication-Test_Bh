@@ -28,22 +28,17 @@ VAR
 	iLoop		: 	INT;
 	bHiByte		:	BOOL := TRUE;
 	arrTempData	:	ARRAY [0..6] OF WORD;
+	iLoopStart	:	INT;
+	iLoopEnd	:	INT;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR iLoop := 0 TO 15 DO
-	pTempData := (pReadData + iLoop);
-	iTempData := pTempData^;
-	
-	IF bHiByte THEN
-		arrTempData[iLoop/2] := SHL(BYTE_TO_WORD(iTempData), 8);
-	ELSE 
-		arrTempData[iLoop/2] := arrTempData[iLoop/2] + BYTE_TO_WORD(iTempData);
-		IF bSwap THEN
-			arrTempData[iLoop/2] := ROL(arrTempData[iLoop/2], 8);
-		END_IF
+        <ST><![CDATA[FOR iLoop := 0 TO 6 DO
+	arrTempData[iLoop] := SHL(BYTE_TO_WORD(pReadData[iLoop*2+3]), 8);
+	arrTempData[iLoop] := arrTempData[iLoop] + BYTE_TO_WORD(pReadData[iLoop*2+3+1]);
+	IF bSwap THEN
+		arrTempData[iLoop] := ROL(arrTempData[iLoop], 8);
 	END_IF
-	bHiByte := NOT bHiByte;
 END_FOR
 
 rFrequency := WORD_TO_REAL(arrTempData[0])/100;
@@ -75,7 +70,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[arrAddress[0][0] := 16#0000;
-arrAddress[0][1] := 14;
+arrAddress[0][1] := 7;		
 
 iNumAddRegion := 1;
 
@@ -153,7 +148,9 @@ END_VAR
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_TDS4339.Convert">
-      <LineId Id="159" Count="13" />
+      <LineId Id="219" Count="2" />
+      <LineId Id="224" Count="1" />
+      <LineId Id="227" Count="1" />
       <LineId Id="175" Count="0" />
       <LineId Id="174" Count="0" />
       <LineId Id="176" Count="0" />

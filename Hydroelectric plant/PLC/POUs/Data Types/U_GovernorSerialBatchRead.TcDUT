@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="U_GovernorSerialBatchRead" Id="{fddb2d8f-6572-4eb9-ad36-cedc4928d477}">
+    <Declaration><![CDATA[TYPE U_GovernorSerialBatchRead :
+UNION
+	stFrame		:	ST_GovernorSerialBatchRead;
+	arrRaw		:	ARRAY [0..16] OF BYTE;
+END_UNION
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

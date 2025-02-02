@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="U_GovernorSerialAck" Id="{ace36f15-863e-4d59-97c7-64b5385b8824}">
+    <Declaration><![CDATA[TYPE U_GovernorSerialAck :
+STRUCT
+	stFrame		:	ST_GovernorSerialAck;
+	arrRawData	:	ARRAY [0..4] OF BYTE;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

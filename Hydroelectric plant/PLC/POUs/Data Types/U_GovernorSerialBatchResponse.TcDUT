@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="U_GovernorSerialBatchResponse" Id="{fa72cd1d-8b60-4be2-a412-a8d7b0c1be4b}">
+    <Declaration><![CDATA[TYPE U_GovernorSerialBatchResponse :
+UNION
+	stFrame		:	ST_GovernorSerialBatchResponse;
+	arrRaw		:	ARRAY [0..21] OF BYTE;
+END_UNION
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

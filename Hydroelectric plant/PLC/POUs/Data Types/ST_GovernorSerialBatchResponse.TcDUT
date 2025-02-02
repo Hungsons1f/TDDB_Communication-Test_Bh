@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_GovernorSerialBatchResponse" Id="{4ce05863-aebd-4029-9c20-dbfb20598ca1}">
+    <Declaration><![CDATA[TYPE ST_GovernorSerialBatchResponse :
+STRUCT
+	iPrefix			:		BYTE;
+	iStationNo		:		STRING[2];
+	iPCNo			:		STRING[2];
+	iDataState		:		WORD;
+	iDataFrequency	:		WORD;
+	iDataSpare1		:		WORD;
+	iDataGateOpening:		WORD;
+	iDataSpare2		:		WORD;
+	iDataBladeOpening:		WORD;
+	iDataGateOpenSet:		WORD;
+	iSuffix			:		BYTE;
+	iCheckSum		:		STRING[2];
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
