@@ -1,0 +1,194 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_TDS4339" Id="{957a0dde-1799-4b15-91fe-5d199fce4705}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TDS4339 EXTENDS FB_ModbusSlave
+VAR
+	rFrequency		:	REAL;
+	iSpeed			:	INT;
+	rPercentSpeed	:	REAL;
+	rMaxFrequency	:	REAL;
+	iMaxSpeed		:	INT;
+	rMaxPercSpeed	:	REAL;
+	rCrawlingSpeed	:	REAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="Property" Id="{e7954ea8-19ef-4115-8fb4-edddc18a0817}" />
+    <Method Name="Convert" Id="{ec284217-4a8e-4a5a-9e53-52838bf70a25}">
+      <Declaration><![CDATA[METHOD Convert : BOOL
+VAR_INPUT
+	iRegionNo	:	INT;
+	pReadData	:	POINTER TO BYTE;
+END_VAR
+VAR
+	pTempData	: 	POINTER TO BYTE;
+	iTempData	: 	BYTE;
+	iLoop		: 	INT;
+	bHiByte		:	BOOL := TRUE;
+	arrTempData	:	ARRAY [0..6] OF WORD;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR iLoop := 0 TO 15 DO
+	pTempData := (pReadData + iLoop);
+	iTempData := pTempData^;
+	
+	IF bHiByte THEN
+		arrTempData[iLoop/2] := SHL(BYTE_TO_WORD(iTempData), 8);
+	ELSE 
+		arrTempData[iLoop/2] := arrTempData[iLoop/2] + BYTE_TO_WORD(iTempData);
+		IF bSwap THEN
+			arrTempData[iLoop/2] := ROL(arrTempData[iLoop/2], 8);
+		END_IF
+	END_IF
+	bHiByte := NOT bHiByte;
+END_FOR
+
+rFrequency := WORD_TO_REAL(arrTempData[0])/100;
+iSpeed := WORD_TO_INT(arrTempData[1]);
+rPercentSpeed := WORD_TO_REAL(arrTempData[2])/10;
+rMaxFrequency := WORD_TO_REAL(arrTempData[3])/100;
+iMaxSpeed := WORD_TO_INT(arrTempData[4]);
+rMaxPercSpeed := WORD_TO_REAL(arrTempData[5])/10;
+rCrawlingSpeed := WORD_TO_REAL(arrTempData[6])/100;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="CrawlingSpeed" Id="{6fbb8f99-eba6-4751-acb8-fbf8109ebae2}" FolderPath="Property\">
+      <Declaration><![CDATA[PROPERTY CrawlingSpeed : REAL]]></Declaration>
+      <Get Name="Get" Id="{2203795f-5aa9-4114-b929-2d58259528ae}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CrawlingSpeed := rCrawlingSpeed;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="FirstCycle" Id="{89a39c7b-89e8-4716-93da-dec591da2f78}">
+      <Declaration><![CDATA[METHOD FirstCycle : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[arrAddress[0][0] := 16#0000;
+arrAddress[0][1] := 14;
+
+iNumAddRegion := 1;
+
+bSwap := FALSE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Frequency" Id="{620ac20d-2a65-497e-8be4-ae58bce5c10f}" FolderPath="Property\">
+      <Declaration><![CDATA[PROPERTY Frequency : REAL]]></Declaration>
+      <Get Name="Get" Id="{ba7bfcec-b633-43d9-a5ab-d6b4738af76f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Frequency := rFrequency;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="MaxFrequency" Id="{2f868daf-64d6-4120-a511-b251d7a6d21f}" FolderPath="Property\">
+      <Declaration><![CDATA[PROPERTY MaxFrequency : REAL]]></Declaration>
+      <Get Name="Get" Id="{b90f36d3-9fa4-45d9-be04-5a12a5fa900e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[MaxFrequency := rMaxFrequency;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="MaxPercentSpeed" Id="{d7fb3d2c-202b-4b6e-8d85-9f5ec3e0a837}" FolderPath="Property\">
+      <Declaration><![CDATA[PROPERTY MaxPercentSpeed : REAL]]></Declaration>
+      <Get Name="Get" Id="{48920653-f97e-4a51-a349-056aa3a4b5df}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[MaxPercentSpeed := rMaxPercSpeed;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="MaxSpeed" Id="{8a90629e-6d82-4fec-b962-89c5f0c22ce1}" FolderPath="Property\">
+      <Declaration><![CDATA[PROPERTY MaxSpeed : INT]]></Declaration>
+      <Get Name="Get" Id="{271e75a5-29e5-4faf-a3b8-c83df1f7218f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[MaxSpeed := iMaxSpeed;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PercentSpeed" Id="{ff95f358-ec54-47ff-ad0d-01db3933ccb0}" FolderPath="Property\">
+      <Declaration><![CDATA[PROPERTY PercentSpeed : REAL]]></Declaration>
+      <Get Name="Get" Id="{21278bec-2152-42ff-a769-344be35bf288}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PercentSpeed := rPercentSpeed;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Speed" Id="{e51ee3a0-f323-439c-8dad-c45d0e29c61b}" FolderPath="Property\">
+      <Declaration><![CDATA[PROPERTY Speed : INT]]></Declaration>
+      <Get Name="Get" Id="{2f60c31c-a560-44fe-91ca-e65795bde3e7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Speed := iSpeed;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <LineIds Name="FB_TDS4339">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS4339.Convert">
+      <LineId Id="159" Count="13" />
+      <LineId Id="175" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="178" Count="4" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="157" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS4339.CrawlingSpeed.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS4339.FirstCycle">
+      <LineId Id="17" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS4339.Frequency.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS4339.MaxFrequency.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS4339.MaxPercentSpeed.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS4339.MaxSpeed.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS4339.PercentSpeed.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TDS4339.Speed.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

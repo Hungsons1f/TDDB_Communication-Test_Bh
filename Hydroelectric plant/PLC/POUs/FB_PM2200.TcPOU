@@ -1,0 +1,681 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_PM2200" Id="{424297d8-0415-4cca-806d-7c8a11b0f60c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_PM2200 EXTENDS FB_ModbusSlave
+VAR
+	// Current
+		rCurrentA		:		REAL;
+		rCurrentB		:		REAL;
+		rCurrentC		:		REAL;
+		rCurrentN		:		REAL;
+		rCurrentG		:		REAL;
+		rCurrentAvg		:		REAL;
+	
+	// Voltage
+		rVoltageAB		:		REAL;
+		rVoltageBC		:		REAL;
+		rVoltageCA		:		REAL;
+		rVoltageLLAvg	:		REAL;
+		rVoltageAN		:		REAL;
+		rVoltageBN		:		REAL;
+		rVoltageCN		:		REAL;
+		rVoltageLNAvg	:		REAL;
+		
+	// Power
+		rActivePowerA	:		REAL;
+		rActivePowerB	:		REAL;
+		rActivePowerC	:		REAL;
+		rActivePowerTotal	:	REAL;
+		rReactivePowerA	:		REAL;
+		rReactivePowerB	:		REAL;
+		rReactivePowerC	:		REAL;
+		rReactivePowerTotal	:	REAL;
+		rApparentPowerA	:		REAL;
+		rApparentPowerB	:		REAL;
+		rApparentPowerC	:		REAL;
+		rApparentPowerTotal	:	REAL;
+		
+	// Power factor
+		rPowerFactorA	:		REAL;
+		rPowerFactorB	:		REAL;
+		rPowerFactorC	:		REAL;
+		rPowerFactorTotal	:	REAL;
+		rDisPowerFactorA	:	REAL;
+		rDisPowerFactorB	:	REAL;
+		rDisPowerFactorC	:	REAL;
+		rDisPowerFactorTotal:	REAL;
+
+	// Frequency
+		rFrequency		: 		REAL;
+		
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="Current" Id="{aad8f6e2-f85c-4590-bee2-fc9fc11e73b4}" />
+    <Folder Name="Frequency" Id="{57dc8446-e937-4ea4-adcb-a83ff4198437}" />
+    <Folder Name="Power" Id="{240b80ca-5775-4dd3-96f2-81112632351c}" />
+    <Folder Name="PowerFactor" Id="{d17a31ec-c8a4-4b98-8494-77ccc1c9fcef}" />
+    <Folder Name="Voltage" Id="{ee7e447e-46ba-4aa7-b5b2-0d1c91b2d434}" />
+    <Property Name="ActivePowerA" Id="{8006af46-3692-40d6-9c2a-7b99240ce7c9}" FolderPath="Power\">
+      <Declaration><![CDATA[PROPERTY ActivePowerA : REAL]]></Declaration>
+      <Get Name="Get" Id="{cde7ac23-7785-4ed4-bac6-b83e98fd25fe}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ActivePowerA := rActivePowerA;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ActivePowerB" Id="{e26dcbd9-43bf-4f3e-a3ab-da6922566ca7}" FolderPath="Power\">
+      <Declaration><![CDATA[PROPERTY ActivePowerB : REAL]]></Declaration>
+      <Get Name="Get" Id="{e574adc6-3c49-48b9-8683-812949d671e5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ActivePowerB := rActivePowerB;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ActivePowerC" Id="{bb3a6ae2-3e6e-4b4d-be7f-97eeb6e20506}" FolderPath="Power\">
+      <Declaration><![CDATA[PROPERTY ActivePowerC : REAL]]></Declaration>
+      <Get Name="Get" Id="{1fef2ffe-5e41-4adf-b314-28032d26426c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ActivePowerC := rActivePowerC;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ActivePowerTotal" Id="{e89b2141-5d5f-40be-ad4c-bbad2f120a32}" FolderPath="Power\">
+      <Declaration><![CDATA[PROPERTY ActivePowerTotal : REAL]]></Declaration>
+      <Get Name="Get" Id="{f57aa843-8fe9-495b-b5f5-6d21b2cec8de}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ActivePowerTotal := rActivePowerTotal;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ApparentPowerA" Id="{a2148909-e6b4-4341-88f8-dea718839d56}" FolderPath="Power\">
+      <Declaration><![CDATA[PROPERTY ApparentPowerA : REAL]]></Declaration>
+      <Get Name="Get" Id="{d01ef356-4378-4990-a36d-19effd77ea47}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ApparentPowerA := rApparentPowerA;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ApparentPowerB" Id="{0e9b7c0f-925f-4b37-b4b9-24f3cb037d02}" FolderPath="Power\">
+      <Declaration><![CDATA[PROPERTY ApparentPowerB : REAL]]></Declaration>
+      <Get Name="Get" Id="{b9acf11d-19f5-4818-8fae-88078a509ee4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ApparentPowerB := rApparentPowerB;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ApparentPowerC" Id="{e5a355cf-cfb1-4a0e-a111-6ea84b5287de}" FolderPath="Power\">
+      <Declaration><![CDATA[PROPERTY ApparentPowerC : REAL]]></Declaration>
+      <Get Name="Get" Id="{45f53545-8bfc-44f7-987a-9bbf6ba83ccd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ApparentPowerC := rApparentPowerC;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ApparentPowerTotal" Id="{d82abb28-f3ef-4acd-a9a2-a626bce318a2}" FolderPath="Power\">
+      <Declaration><![CDATA[PROPERTY ApparentPowerTotal : REAL]]></Declaration>
+      <Get Name="Get" Id="{9271b6a5-21d5-45c2-ad59-e511e341c355}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ApparentPowerTotal := rApparentPowerTotal;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Convert" Id="{276333c7-3466-47b5-afde-518a7f2664a8}">
+      <Declaration><![CDATA[METHOD Convert : BOOL
+VAR_INPUT
+	iRegionNo	:	INT;
+	pReadData	:	POINTER TO BYTE;
+END_VAR
+VAR
+	iTempDataHi	: 	BYTE;
+	iTempDataLo	:	BYTE;
+	iLoop		: 	INT;
+	bHiByte		:	BOOL := TRUE;
+	arrTempData	:	ARRAY [0..3] OF U_Word2Real;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR iLoop := 0 TO 3 DO
+	arrTempData[iLoop].iWord[1] := SHL(BYTE_TO_WORD(pReadData[iLoop*4+3]), 8);
+	arrTempData[iLoop].iWord[1] := arrTempData[iLoop].iWord[1] + BYTE_TO_WORD(pReadData[iLoop*4+3+1]);
+	arrTempData[iLoop].iWord[0] := SHL(BYTE_TO_WORD(pReadData[iLoop*4+3+2]), 8);
+	arrTempData[iLoop].iWord[0] := arrTempData[iLoop].iWord[0] + BYTE_TO_WORD(pReadData[iLoop*4+3+3]);
+	IF bSwap THEN
+		arrTempData[iLoop].iWord[0] := ROL(arrTempData[iLoop].iWord[0], 8);
+		arrTempData[iLoop].iWord[1] := ROL(arrTempData[iLoop].iWord[1], 8);
+	END_IF
+END_FOR
+
+CASE iRegionNo OF
+	0: 
+		rCurrentA := arrTempData[0].rReal;
+		rCurrentB := arrTempData[1].rReal;
+		rCurrentC := arrTempData[2].rReal;
+		rCurrentN := arrTempData[3].rReal;
+
+	1:
+		rCurrentG := arrTempData[0].rReal;
+		rCurrentAvg := arrTempData[1].rReal;
+
+		
+	2: 
+		rVoltageAB := arrTempData[0].rReal;
+		rVoltageBC := arrTempData[1].rReal;
+		rVoltageCA := arrTempData[2].rReal;
+		rVoltageLLAvg := arrTempData[3].rReal;
+		
+	3:
+		rVoltageAN := arrTempData[0].rReal;
+		rVoltageBN := arrTempData[1].rReal;
+		rVoltageCN := arrTempData[2].rReal;
+		rVoltageLNAvg := arrTempData[3].rReal;
+
+	4: 
+		rActivePowerA := arrTempData[0].rReal;
+		rActivePowerB := arrTempData[1].rReal;
+		rActivePowerC := arrTempData[2].rReal;
+		rActivePowerTotal := arrTempData[3].rReal;
+		
+	5:
+		rReactivePowerA := arrTempData[0].rReal;
+		rReactivePowerB := arrTempData[1].rReal;
+		rReactivePowerC := arrTempData[2].rReal;
+		rReactivePowerTotal := arrTempData[3].rReal;
+		
+	6: 
+		rApparentPowerA := arrTempData[0].rReal;
+		rApparentPowerB := arrTempData[1].rReal;
+		rApparentPowerC := arrTempData[2].rReal;
+		rApparentPowerTotal := arrTempData[3].rReal;
+		
+	7:
+		rPowerFactorA := arrTempData[0].rReal;
+		rPowerFactorB := arrTempData[1].rReal;
+		rPowerFactorC := arrTempData[2].rReal;
+		rPowerFactorTotal := arrTempData[3].rReal;
+
+	8:
+		rDisPowerFactorA := arrTempData[0].rReal;
+		rDisPowerFactorB := arrTempData[1].rReal;
+		rDisPowerFactorC := arrTempData[2].rReal;
+		rDisPowerFactorTotal := arrTempData[3].rReal;
+		
+	9:	
+		rFrequency := arrTempData[0].rReal;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="CurrentA" Id="{6e3a5adf-72fb-431c-8ff2-2b891aa46754}" FolderPath="Current\">
+      <Declaration><![CDATA[PROPERTY CurrentA : REAL]]></Declaration>
+      <Get Name="Get" Id="{277d5b40-4bb7-44d7-80f9-e417bf55a795}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CurrentA := rCurrentA;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CurrentAvg" Id="{c8ddbb38-311d-496c-bdd3-58aa319dd73d}" FolderPath="Current\">
+      <Declaration><![CDATA[PROPERTY CurrentAvg : REAL]]></Declaration>
+      <Get Name="Get" Id="{a1d49ba2-aec5-41bc-89fb-6853aa227173}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CurrentAvg := rCurrentAvg;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CurrentB" Id="{b9b59708-ff9c-4504-9200-1721c8e941b4}" FolderPath="Current\">
+      <Declaration><![CDATA[PROPERTY CurrentB : REAL]]></Declaration>
+      <Get Name="Get" Id="{5cbb6a58-3026-49dd-ae88-dc02d5b3a3c8}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CurrentB := rCurrentB;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CurrentC" Id="{b33d2bcc-b984-4f4d-901c-92d4b61032dc}" FolderPath="Current\">
+      <Declaration><![CDATA[PROPERTY CurrentC : REAL]]></Declaration>
+      <Get Name="Get" Id="{e174e283-683c-4cb0-a75b-c577b2c9ba83}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CurrentC := rCurrentC;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CurrentG" Id="{5efde95b-fb9a-4d19-8b52-d50d949f0706}" FolderPath="Current\">
+      <Declaration><![CDATA[PROPERTY CurrentG : REAL]]></Declaration>
+      <Get Name="Get" Id="{6058a29f-6386-446f-a227-8e6df624a3a4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CurrentG := rCurrentG;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="CurrentN" Id="{85c84f5f-ef43-43e9-8f21-4d28f90434e6}" FolderPath="Current\">
+      <Declaration><![CDATA[PROPERTY CurrentN : REAL]]></Declaration>
+      <Get Name="Get" Id="{0c2ba34a-d49c-4745-b021-a9faa13caff2}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[CurrentN := rCurrentN;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="FirstCycle" Id="{e08c1b98-7f51-4715-953e-b416f51dff4f}">
+      <Declaration><![CDATA[METHOD FirstCycle : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[arrAddress[0][0] := 2999;			// Current A & B & C & N
+arrAddress[0][1] := 16;
+arrAddress[1][0] := 3007;			// Current G & Avg
+arrAddress[1][1] := 8;
+
+arrAddress[2][0] := 3019;			// Voltage AB, BC, CA, LL Avg
+arrAddress[2][1] := 16;		
+arrAddress[3][0] := 3027;			// Voltage AN, BN, CN, LN Avg
+arrAddress[3][1] := 16;		
+		
+arrAddress[4][0] := 3053;			// Active Power 
+arrAddress[4][1] := 16;				
+arrAddress[5][0] := 3061;			// Reactive Power
+arrAddress[5][1] := 16;			
+arrAddress[6][0] := 3069;			// Apparent Power
+arrAddress[6][1] := 16;				
+
+arrAddress[7][0] := 3077;			// Power factor
+arrAddress[7][1] := 16;		
+arrAddress[8][0] := 3085;			// Displacement Power factor
+arrAddress[8][1] := 16;		
+		
+arrAddress[9][0] := 3109;			// Frequency
+arrAddress[9][1] := 4;				
+
+iNumAddRegion := 10;
+
+bSwap := FALSE;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Frequency" Id="{5d33b9b2-122e-49e4-84d9-c9f2f33ea5f5}" FolderPath="Frequency\">
+      <Declaration><![CDATA[PROPERTY Frequency : REAL]]></Declaration>
+      <Get Name="Get" Id="{a64badf3-e182-4152-8958-474e50587e3e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Frequency := rFrequency;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PowerFactorA" Id="{43867286-1dc7-4c05-bd83-b8dadb442186}" FolderPath="PowerFactor\">
+      <Declaration><![CDATA[PROPERTY PowerFactorA : REAL]]></Declaration>
+      <Get Name="Get" Id="{7e41bc20-fa87-4b3c-81e0-5763ac164481}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PowerFactorA := rPowerFactorA;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PowerFactorB" Id="{59fddbc9-fcb4-4e4d-8faa-705ad30b79ac}" FolderPath="PowerFactor\">
+      <Declaration><![CDATA[PROPERTY PowerFactorB : REAL]]></Declaration>
+      <Get Name="Get" Id="{ee21a969-dccb-46a1-baa9-528c88048c55}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PowerFactorB := rPowerFactorB;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PowerFactorC" Id="{accff16e-dae5-4fee-b222-906c2d5a04d6}" FolderPath="PowerFactor\">
+      <Declaration><![CDATA[PROPERTY PowerFactorC : REAL]]></Declaration>
+      <Get Name="Get" Id="{fb0e88fc-0a31-4e26-8af0-68fe71c18179}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PowerFactorC := rPowerFactorC;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="PowerFactorTotal" Id="{fe314148-bdac-4d82-8d5a-cbafd2678a74}" FolderPath="PowerFactor\">
+      <Declaration><![CDATA[PROPERTY PowerFactorTotal : REAL]]></Declaration>
+      <Get Name="Get" Id="{d2966b6b-cf05-4649-bc7f-ae94bc07c967}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[PowerFactorTotal := rPowerFactorTotal;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ReActivePowerA" Id="{7b30f828-e34e-4fc1-897d-eb83f2f6f7f5}" FolderPath="Power\">
+      <Declaration><![CDATA[PROPERTY ReActivePowerA : REAL]]></Declaration>
+      <Get Name="Get" Id="{e96c0b95-5e29-4876-961e-c67e643b4565}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ReActivePowerA := rReactivePowerA;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ReActivePowerB" Id="{e2e38969-6f46-42d8-ba71-f1332d1477a3}" FolderPath="Power\">
+      <Declaration><![CDATA[PROPERTY ReActivePowerB : REAL]]></Declaration>
+      <Get Name="Get" Id="{e5d3178a-476e-4ce6-9371-f62f617d8322}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ReActivePowerB := rReactivePowerB;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ReActivePowerC" Id="{e4024ec7-f12b-4d89-af86-22ce53915ddf}" FolderPath="Power\">
+      <Declaration><![CDATA[PROPERTY ReActivePowerC : REAL]]></Declaration>
+      <Get Name="Get" Id="{8cdb28d5-3417-4fa9-ae27-858aadd405f6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ReActivePowerC := rReactivePowerC;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="ReActivePowerTotal" Id="{f71c98ff-1a16-4a35-8de7-19ba732bc6f8}" FolderPath="Power\">
+      <Declaration><![CDATA[PROPERTY ReActivePowerTotal : REAL]]></Declaration>
+      <Get Name="Get" Id="{56f7c7f2-00ac-469c-aa4b-ac213437d9f4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ReActivePowerTotal := rReactivePowerTotal;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="VoltageAB" Id="{38a4abb1-ef67-4ef6-b064-daa621e0c95f}" FolderPath="Voltage\">
+      <Declaration><![CDATA[PROPERTY VoltageAB : REAL]]></Declaration>
+      <Get Name="Get" Id="{d34ed5e3-3bbf-4011-9f1e-c3ce1050a57e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[VoltageAB := rVoltageAB;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="VoltageAN" Id="{74dd6a27-c297-4874-b6ae-3ec148dff418}" FolderPath="Voltage\">
+      <Declaration><![CDATA[PROPERTY VoltageAN : REAL]]></Declaration>
+      <Get Name="Get" Id="{5c62924a-5b94-4b6a-9b8e-9f6958bfa5e3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[VoltageAN := rVoltageAN;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="VoltageBC" Id="{8d46712b-0149-49b5-b247-56eba882602d}" FolderPath="Voltage\">
+      <Declaration><![CDATA[PROPERTY VoltageBC : REAL]]></Declaration>
+      <Get Name="Get" Id="{37c45a4c-bd88-478e-9d9b-fd9f6fe50a48}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[VoltageBC := rVoltageBC;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="VoltageBN" Id="{b14d93bc-3831-4169-84cd-e53bc5c403a7}" FolderPath="Voltage\">
+      <Declaration><![CDATA[PROPERTY VoltageBN : REAL]]></Declaration>
+      <Get Name="Get" Id="{67b5db7d-8c2c-4ddc-9d4b-fbc0da3cf136}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[VoltageBN := rVoltageBN;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="VoltageCA" Id="{8aecbaf9-329e-4aa3-819c-57df5b1294fe}" FolderPath="Voltage\">
+      <Declaration><![CDATA[PROPERTY VoltageCA : REAL]]></Declaration>
+      <Get Name="Get" Id="{e6a7066e-e793-40a1-a4fa-1fef01694f11}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[VoltageCA := rVoltageCA;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="VoltageCN" Id="{8607b322-dae0-4657-a6bb-aa57743cabd0}" FolderPath="Voltage\">
+      <Declaration><![CDATA[PROPERTY VoltageCN : REAL]]></Declaration>
+      <Get Name="Get" Id="{63029af5-a5e9-405e-8264-60058282b3e8}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[VoltageCN := rVoltageCN;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="VoltageLLAvg" Id="{5fc32faf-a587-4842-91b6-8abb38b5d335}" FolderPath="Voltage\">
+      <Declaration><![CDATA[PROPERTY VoltageLLAvg : REAL]]></Declaration>
+      <Get Name="Get" Id="{849cc59c-6352-49c4-8c95-81fa41fd7b62}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[VoltageLLAvg := rVoltageLLAvg;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="VoltageLNAvg" Id="{6b01c02f-16cc-42bd-aa93-9eb4330de1db}" FolderPath="Voltage\">
+      <Declaration><![CDATA[PROPERTY VoltageLNAvg : REAL]]></Declaration>
+      <Get Name="Get" Id="{fe99175c-cc9f-41f5-b63c-b9484553d3fa}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[VoltageLNAvg := rVoltageLNAvg;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <LineIds Name="FB_PM2200">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.ActivePowerA.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.ActivePowerB.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.ActivePowerC.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.ActivePowerTotal.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.ApparentPowerA.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.ApparentPowerB.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.ApparentPowerC.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.ApparentPowerTotal.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.Convert">
+      <LineId Id="142" Count="0" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="196" Count="1" />
+      <LineId Id="155" Count="1" />
+      <LineId Id="199" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="143" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="158" Count="1" />
+      <LineId Id="137" Count="2" />
+      <LineId Id="201" Count="0" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="203" Count="1" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="161" Count="4" />
+      <LineId Id="205" Count="1" />
+      <LineId Id="166" Count="1" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="172" Count="4" />
+      <LineId Id="207" Count="1" />
+      <LineId Id="177" Count="5" />
+      <LineId Id="221" Count="5" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="230" Count="2" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="220" Count="0" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="212" Count="4" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="16" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.CurrentA.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.CurrentAvg.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.CurrentB.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.CurrentC.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.CurrentG.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.CurrentN.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.FirstCycle">
+      <LineId Id="5" Count="1" />
+      <LineId Id="34" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="40" Count="1" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="55" Count="1" />
+      <LineId Id="23" Count="2" />
+      <LineId Id="58" Count="1" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.Frequency.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.PowerFactorA.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.PowerFactorB.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.PowerFactorC.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.PowerFactorTotal.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.ReActivePowerA.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.ReActivePowerB.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.ReActivePowerC.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.ReActivePowerTotal.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.VoltageAB.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.VoltageAN.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.VoltageBC.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.VoltageBN.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.VoltageCA.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.VoltageCN.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.VoltageLLAvg.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PM2200.VoltageLNAvg.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

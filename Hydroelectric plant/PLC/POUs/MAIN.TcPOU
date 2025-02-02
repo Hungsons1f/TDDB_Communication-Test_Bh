@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="MAIN" Id="{6ac36258-e55b-447c-a8b0-7fbd9ecdc80e}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	bDO11 AT %Q* :BOOL;
+	bDO12 AT %Q*	:BOOL;
+	bDO13 AT %Q*	:BOOL;
+	bDO14 AT %Q*	:BOOL;
+	bDO15 AT %Q*	:BOOL;
+	bDO16 AT %Q*	:BOOL;
+	bDO17 AT %Q*	:BOOL;
+	bDO18 AT %Q*	:BOOL;
+	bDO19 AT %Q*	:BOOL;
+	bDO110 AT %Q* :BOOL;
+	bDO111 AT %Q* :BOOL;
+	bDO112 AT %Q* :BOOL;
+	bDO113 AT %Q* :BOOL;
+	bDO114 AT %Q* :BOOL;
+	bDO115 AT %Q* :BOOL;
+	bDO116 AT %Q* :BOOL;
+		
+	bDO21 AT %Q* :BOOL;
+	bDO22 AT %Q*:BOOL;
+	bDO23 AT %Q*:BOOL;
+	bDO24 AT %Q*:BOOL;
+	bDO25 AT %Q*:BOOL;
+	bDO26 AT %Q*:BOOL;
+	bDO27 AT %Q*:BOOL;
+	bDO28 AT %Q*:BOOL;
+	bDO29 AT %Q*:BOOL;
+	bDO210 AT %Q* :BOOL;
+	bDO211 AT %Q* :BOOL;
+	bDO212 AT %Q* :BOOL;
+	bDO213 AT %Q* :BOOL;
+	bDO214 AT %Q* :BOOL;
+	bDO215 AT %Q* :BOOL;
+	bDO216 AT %Q* :BOOL;
+	
+	AI_GovernorGuideVaneOil_Preesure 	AT%I* :WORD;
+	AI_GovernorBlOilade_Pressure 		AT%I* :WORD;
+	AI_Excitatiob_Voltage 				AT%I* :WORD;
+	AI_Excitatiob_Current 				AT%I* :WORD;
+	AI_SpiralCase_Pressure 				AT%I* :WORD;
+	AI_HeadCase_Pressure 				AT%I* :WORD;
+	AI_DraftT1Case_Pressure 			AT%I* :WORD;
+	AI_DraftT2Case_Voltage 				AT%I* :WORD;
+	
+	wGovernorGuideVaneOilPreesure 	:WORD;
+	wGovernorBlOiladePressure 		:WORD;
+	wExcitationVoltage 				:WORD;
+	wExcitationCurrent 				:WORD;
+	wSpiralCasePressure 			:WORD;
+	wHeadCasePressure 				:WORD;
+	wDraftT1CasePressure 			:WORD;
+	wDraftT2CaseVoltage 			:WORD;
+	
+	lrGovernorGuideVaneOilPreesure 	:LREAL;
+	lrGovernorBladeOilPressure 		:LREAL;
+	lrExcitationVoltage 			:LREAL;
+	lrExcitationCurrent 			:LREAL;
+	lrSpiralCasePressure 			:LREAL;
+	lrHeadCasePressure 				:LREAL;
+	lrDraftT1CasePressure 			:LREAL;
+	lrDraftT2CasePressure 			:LREAL;
+	
+	fbCal1	: FB_CalculateAI;
+	fbCal2	: FB_CalculateAI;
+	fbCal3	: FB_CalculateAI;
+	fbCal4	: FB_CalculateAI;
+	fbCal5	: FB_CalculateAI;
+	fbCal6	: FB_CalculateAI;
+	fbCal7	: FB_CalculateAI;
+	fbCal8	: FB_CalculateAI;
+	
+	fbModbus : FB_Modbus;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//Assignment input
+	wGovernorGuideVaneOilPreesure 	:= AI_GovernorGuideVaneOil_Preesure ;
+	wGovernorBlOiladePressure 		:= AI_GovernorBlOilade_Pressure ;
+	wExcitationVoltage 				:= AI_Excitatiob_Voltage;
+	wExcitationCurrent 				:= AI_Excitatiob_Current;
+	wSpiralCasePressure 			:= AI_SpiralCase_Pressure;
+	wHeadCasePressure 				:= AI_HeadCase_Pressure ;
+	wDraftT1CasePressure 			:= AI_DraftT1Case_Pressure ;
+	wDraftT2CaseVoltage 			:= AI_DraftT2Case_Voltage ;
+	
+//Calculate input
+	//Chanel 1 data
+		fbCal1.MaxEngIn := LREAL_TO_WORD(6);
+		fbCal1.MinEngIn	:= LREAL_TO_WORD(0);
+		fbCal1.RawIn := wGovernorGuideVaneOilPreesure;
+		fbCal1.Description:= 'MPa';
+		
+	//Chanel 2 data
+		fbCal2.MaxEngIn := LREAL_TO_WORD(25);
+		fbCal2.MinEngIn	:= LREAL_TO_WORD(0);
+		fbCal2.RawIn := wGovernorBlOiladePressure ;
+		fbCal2.Description:= 'MPa';
+	
+	//Chanel 3 data
+		fbCal3.MaxEngIn := LREAL_TO_WORD(300);
+		fbCal3.MinEngIn	:= LREAL_TO_WORD(0);
+		fbCal3.RawIn := wExcitationVoltage;
+		fbCal3.Description:= 'V';
+		
+	//Chanel 4 data
+		fbCal4.MaxEngIn := LREAL_TO_WORD(500);
+		fbCal4.MinEngIn	:= LREAL_TO_WORD(0);
+		fbCal4.RawIn := wExcitationCurrent ;
+		fbCal4.Description:= 'A';
+		
+	//Chanel 5 data
+		fbCal5.MaxEngIn := LREAL_TO_WORD(0.4*1000);
+		fbCal5.MinEngIn	:= LREAL_TO_WORD(0*1000);
+		fbCal5.RawIn := wSpiralCasePressure;
+		fbCal5.Description:= 'MPa';
+		
+	//Chanel 6 data
+		fbCal6.MaxEngIn := LREAL_TO_WORD(0.3*1000);
+		fbCal6.MinEngIn	:= LREAL_TO_WORD(-0.1*1000);
+		fbCal6.RawIn := wHeadCasePressure;
+		fbCal6.Description:= 'MPa';
+		
+	//Chanel 7 data
+		fbCal7.MaxEngIn := LREAL_TO_WORD(0.3*1000);
+		fbCal7.MinEngIn	:= LREAL_TO_WORD(-0.1*1000);
+		fbCal7.RawIn := wDraftT1CasePressure;
+		fbCal7.Description:= 'MPa';
+		
+	//Chanel 8 data
+		fbCal8.MaxEngIn := LREAL_TO_WORD(0.3*1000);
+		fbCal8.MinEngIn	:= LREAL_TO_WORD(-0.1*1000);
+		fbCal8.RawIn := wDraftT2CaseVoltage;
+		fbCal8.Description:= 'MPa';
+
+// Call FB
+	fbCal1();
+	fbCal2();
+	fbCal3();
+	fbCal4();
+	fbCal5();
+	fbCal6();
+	fbCal7();
+	fbCal8();
+		
+//Calculate output
+	//Chanel 1 output
+		lrGovernorGuideVaneOilPreesure := fbCal1.CalVal;
+		
+	//Chanel 2 output
+		lrGovernorBladeOilPressure := fbCal2.CalVal;
+		
+	//Chanel 3 output
+		lrExcitationVoltage := fbCal3.CalVal;
+		
+	//Chanel 4 output
+		lrExcitationCurrent := fbCal4.CalVal;
+		
+	//Chanel 5 output
+		lrSpiralCasePressure := fbCal5.CalVal/1000;
+		
+	//Chanel 6 output
+		lrHeadCasePressure := fbCal6.CalVal/1000;
+		
+	//Chanel 7 output
+		lrDraftT1CasePressure := fbCal7.CalVal/1000;
+		
+	//Chanel 8 output
+		lrDraftT2CasePressure := fbCal8.CalVal/1000;
+
+fbModbus();
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="70" Count="0" />
+      <LineId Id="62" Count="7" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="90" Count="1" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="95" Count="3" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="99" Count="3" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="105" Count="3" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="111" Count="3" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="117" Count="3" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="123" Count="3" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="129" Count="3" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="252" Count="8" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="261" Count="0" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="156" Count="22" />
+      <LineId Id="337" Count="0" />
+      <LineId Id="336" Count="0" />
+      <LineId Id="413" Count="0" />
+      <LineId Id="412" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

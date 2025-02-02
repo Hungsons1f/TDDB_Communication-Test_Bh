@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_CalculateAI" Id="{a6c90192-70c6-4243-bf6d-396050117d59}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_CalculateAI
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	wMinRawIn		: WORD := 0;
+	wMaxRawIn		: WORD := 32767;
+	wRawIn			: WORD;
+	wMinEngIn		: WORD;
+	wMaxEngIn		: WORD;
+	lrCalVal			: lreal;
+	sDescription 	: STRING;
+	lrRes			: LREAL;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[lrRes := WORD_TO_LREAL(wRawIn)/WORD_TO_LREAL(wMaxRawIn);
+lrCalVal:= word_to_lreal(wMaxEngIn) * lrRes;]]></ST>
+    </Implementation>
+    <Property Name="CalVal" Id="{af397cf3-0928-4bff-b3eb-aeb49c8e1d11}">
+      <Declaration><![CDATA[PROPERTY CalVal : LREAL]]></Declaration>
+      <Get Name="Get" Id="{85e151f0-1c31-4c13-97dc-9776e9cac336}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Calval := lrCalVal; ]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{a13171ca-7404-4b29-8916-65c34c48aba3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[lrCalVal := Calval; ]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Description" Id="{cbbbf50f-2b80-4046-b0e8-1c6bce65ff9f}">
+      <Declaration><![CDATA[PROPERTY Description : STRING]]></Declaration>
+      <Set Name="Set" Id="{c4e9289c-9ecc-4ff3-b11f-e6b2b98ce63d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[sDescription := Description;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="MaxEngIn" Id="{03467a06-4a26-4190-acd3-99669d2afc76}">
+      <Declaration><![CDATA[PROPERTY MaxEngIn : WORD]]></Declaration>
+      <Set Name="Set" Id="{acdfb422-bc28-4ff2-9164-cae3fd2f8aaa}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[wMaxEngIn := MaxEngIn;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="MinEngIn" Id="{32fb28d8-0849-4619-977e-7cd9b48f6080}">
+      <Declaration><![CDATA[PROPERTY MinEngIn : WORD]]></Declaration>
+      <Set Name="Set" Id="{4445036d-d7dd-440c-9bfa-9232a153cbb9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[wMinEngIn := MinEngIn;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="RawIn" Id="{d3a1ef51-bca2-4303-b3bb-c4468ab43115}">
+      <Declaration><![CDATA[PROPERTY RawIn : WORD]]></Declaration>
+      <Set Name="Set" Id="{ca413d67-ec75-49f6-b622-b5603270f4a9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[wRawIn := RawIn;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <LineIds Name="FB_CalculateAI">
+      <LineId Id="26" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CalculateAI.CalVal.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CalculateAI.CalVal.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CalculateAI.Description.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CalculateAI.MaxEngIn.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CalculateAI.MinEngIn.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CalculateAI.RawIn.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

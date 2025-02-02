@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="U_Word2Real" Id="{f4545a94-9d0a-4201-95c0-2aa00f2c826a}">
+    <Declaration><![CDATA[TYPE U_Word2Real :
+UNION
+	iWord: ARRAY [0..1] OF WORD;
+	rReal: REAL;
+END_UNION
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
